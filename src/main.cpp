@@ -681,11 +681,11 @@ int64 CBlock::GetBlockValue(int64 nFees) const
 
     return nSubsidy + nFees;
 }
-
+//根据历史的区块中的nbits获取当前这个nbits的难度移动的大小的值
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast)
 {
-    const unsigned int nTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-    const unsigned int nTargetSpacing = 10 * 60;
+    const unsigned int nTargetTimespan = 14 * 24 * 60 * 60; // two weeks// 两周调整一次
+    const unsigned int nTargetSpacing = 10 * 60;// 10 分钟出一个块
     const unsigned int nInterval = nTargetTimespan / nTargetSpacing;
 
     // Genesis block
@@ -703,6 +703,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast)
     assert(pindexFirst);
 
     // Limit adjustment step
+    // Limit adjustment step  这里要是调整的太大太小都做一个限制
     unsigned int nActualTimespan = pindexLast->nTime - pindexFirst->nTime;
     printf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
     if (nActualTimespan < nTargetTimespan/4)
