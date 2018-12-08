@@ -48,8 +48,8 @@ bool EvalScript(const CScript& script, const CTransaction& txTo, unsigned int nI
     CScript::const_iterator pc = script.begin();
     CScript::const_iterator pend = script.end();
     CScript::const_iterator pbegincodehash = script.begin();
-    vector<bool> vfExec;
-    vector<valtype> stack;
+    vector<bool> vfExec;// 这个是暂时记录 栈中执行if判断结果的地方
+    vector<valtype> stack;// 栈就是这个，而valtype是一个定义 typedef vector<unsigned char> valtype;
     vector<valtype> altstack;
     if (pvStackRet)
         pvStackRet->clear();
@@ -1122,6 +1122,6 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
 
     if (txin.prevout.hash != txFrom.GetHash())
         return false;
-
+// 注意这里把 txin 的 scriptSig 和 txout 的 scriptPubKey 拼接在一起
     return EvalScript(txin.scriptSig + CScript(OP_CODESEPARATOR) + txout.scriptPubKey, txTo, nIn, nHashType);
 }

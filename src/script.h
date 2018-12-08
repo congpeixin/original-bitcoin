@@ -320,8 +320,8 @@ inline string StackString(const vector<vector<unsigned char> >& vStack)
 
 
 
-
-
+//这类的作用，是像提供了一个容器，这个容器可以存储其他类型的数据(基本类型，uint64，uint256，uint160...)，换句话说，这是提供了一个容器来接受各种数据类型的序列化。
+//它是由一系列操作符和数据组合而成的，由操作符持有逻辑(动作)，由数据持有"状态"的结构体，因为它最终是被传输和存储的，所以使用vector<char>作为容器，将操作符和数据“序列化”到了这个容器中。
 
 
 class CScript : public vector<unsigned char>
@@ -393,7 +393,7 @@ public:
     explicit CScript(const CBigNum& b) { operator<<(b); }
     explicit CScript(const vector<unsigned char>& b) { operator<<(b); }
 
-
+// 把各种类型的数据序列化到 vector 中
     CScript& operator<<(char b)           { return (push_int64(b)); }
     CScript& operator<<(short b)          { return (push_int64(b)); }
     CScript& operator<<(int b)            { return (push_int64(b)); }
@@ -469,7 +469,7 @@ public:
         return (*this);
     }
 
-
+//从vector<char>这样的“流”式数据中把操作符从其中识别出来的方法。
     bool GetOp(iterator& pc, opcodetype& opcodeRet, vector<unsigned char>& vchRet)
     {
          // This is why people hate C++
@@ -586,7 +586,7 @@ public:
 
 
 
-
+//执行Script的函数
 bool EvalScript(const CScript& script, const CTransaction& txTo, unsigned int nIn, int nHashType=0,
                 vector<vector<unsigned char> >* pvStackRet=NULL);
 uint256 SignatureHash(CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);

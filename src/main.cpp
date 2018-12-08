@@ -402,7 +402,7 @@ void CWalletTx::AddSupportingTransactions(CTxDB& txdb)
 
 
 
-
+//验证交易方法：
 bool CTransaction::AcceptTransaction(CTxDB& txdb, bool fCheckInputs, bool* pfMissingInputs)
 {
     if (pfMissingInputs)
@@ -2510,7 +2510,7 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet)
 
 
 
-
+//交易函数
 bool CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, int64& nFeeRequiredRet)
 {
     nFeeRequiredRet = 0;
