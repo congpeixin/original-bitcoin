@@ -193,6 +193,8 @@ public:
 class CTxIn
 {
 public:
+//  每笔交易Tx的输入交易（CTxIn类）包含一个COutPoint对象prevout，该对象引用另外一笔交易Tx的输出交易作为来源交易。
+//  来源交易使当前交易Tx从另一笔交易当中得到可花费的比特币。一笔交易Tx可以拥有任意笔输入交易
     COutPoint prevout;
     CScript scriptSig;
     //nSequence 在 v0.1 中没有起到什么作用，也不会用来作校验，但是这个字段今后被作为了其他用途，而且成为了bitcoin的一个软分叉的最佳例子
