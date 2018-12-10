@@ -61,7 +61,7 @@ CAddress addrIncoming;
 //
 // mapKeys
 //
-
+//将生成的bitcoin地址添加
 bool AddKey(const CKey& key)
 {
     CRITICAL_BLOCK(cs_mapKeys)
