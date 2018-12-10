@@ -2545,9 +2545,15 @@ bool CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, in
                     nValueIn += pcoin->GetCredit();
 
                 // Fill vout[0] to the payee
+//                 并添加一笔输出交易至wtxNew。该笔输出将支付给<收款人地址160位哈希>（包含在scriptPubKey里面）数量为的币
                 wtxNew.vout.push_back(CTxOut(nValueOut, scriptPubKey));
 
                 // Fill vout[1] back to self with any change
+//                 如果需要找零（nValueIn > nValue），添加另一笔输出交易至wtxNew并将零钱发回本人。
+//                 该过程包含以下步骤：
+// 从setCoin当中获取第一笔交易txFirst，依次检查txFirst.vout中的交易是否属于本人。如果是则从该笔输出交易当中提取出公钥，并放入本地变量vchPubKey
+// 将vchPubKey放入脚本vchPubKey OP_CHECKSIG，并使用这段脚本代码为wtxNew添加一个支付给本人的输出交易
+// 因为setCoins包含支付给本人的交易，所以每笔交易一定包括至少一笔支付给本人的交易。从第一笔交易txFirst中即可找到。
                 if (nValueIn > nValue)
                 {
                     // Use the same key as one of the coins
@@ -2627,12 +2633,16 @@ bool CommitTransactionSpent(const CWalletTx& wtxNew)
 
 
 
-
+// 当用户发送比特币到某一个地址时，比特币客户端会调用SendMoney()方法。该方法包含三个参数：
+// scriptPubKey包含脚本代码OP_DUP OP_HASH160 <收款人地址160位哈希> OP_EQUALVERIFY OP_CHECKSIG。
+// nValue表示将要转账的金额。该金额并未包含交易费nTrasactionFee。
+// wtxNew是一个CWalletTx类的本地变量。该变量目前的值为空，之后会包含若干CMerkleTX类对象。该类由CTransaction衍生而来，并且添加了若干方法。我们暂时先不管具体细节，仅将其看作CTransaction类。
 bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew)
 {
     CRITICAL_BLOCK(cs_main)
     {
         int64 nFeeRequired;
+        // 首先建立一笔新的交易
         if (!CreateTransaction(scriptPubKey, nValue, wtxNew, nFeeRequired))
         {
             string strError;
@@ -2643,6 +2653,7 @@ bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew)
             wxMessageBox(strError, "Sending...");
             return error("SendMoney() : %s\n", strError.c_str());
         }
+        // 尝试将这笔交易提交至数据库（CommitTransactionSpent(wtxNet)
         if (!CommitTransactionSpent(wtxNew))
         {
             wxMessageBox("Error finalizing transaction", "Sending...");
@@ -2650,7 +2661,7 @@ bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew)
         }
 
         printf("SendMoney: %s\n", wtxNew.GetHash().ToString().substr(0,6).c_str());
-
+        // 如果该笔交易提交成功
         // Broadcast
         if (!wtxNew.AcceptTransaction())
         {
@@ -2659,6 +2670,7 @@ bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew)
             wxMessageBox("Error: Transaction not valid", "Sending...");
             return error("SendMoney() : Error: Transaction not valid");
         }
+        //将其广播至其他peer节点
         wtxNew.RelayWalletTransaction();
     }
     MainFrameRepaint();
