@@ -66,16 +66,21 @@ bool AddKey(const CKey& key)
 {
     CRITICAL_BLOCK(cs_mapKeys)
     {
+// mapKeys建立公钥与私钥的一一对应关系。
         mapKeys[key.GetPubKey()] = key.GetPrivKey();
+// mapPubKeys建立公钥的hash和公钥本身的对应关系。
         mapPubKeys[Hash160(key.GetPubKey())] = key.GetPubKey();
     }
     return CWalletDB().WriteKey(key.GetPubKey(), key.GetPrivKey());
 }
-
+// 生成比特币地址
 vector<unsigned char> GenerateNewKey()
 {
     CKey key;
     key.MakeNewKey();
+//  调用addKey()方法将新建的key添加至
+//  1）全局映射mapKeys
+//  2）全局map mapPubKeys 和 钱包数据库wallet.dat（第8行）
     if (!AddKey(key))
         throw runtime_error("GenerateNewKey() : AddKey failed\n");
     return key.GetPubKey();
